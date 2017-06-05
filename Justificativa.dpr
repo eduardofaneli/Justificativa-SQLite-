@@ -1,5 +1,7 @@
 program Justificativa;
 
+{$R *.dres}
+
 uses
   Vcl.Forms,
   uPrincipal in 'uPrincipal.pas' {frmPrincipal},
@@ -14,8 +16,8 @@ begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   TStyleManager.TrySetStyle('Golden Graphite');
-  Application.CreateForm(TdmPrincipal, dmPrincipal);
   Application.CreateForm(TfrmPrincipal, frmPrincipal);
+  Application.CreateForm(TdmPrincipal, dmPrincipal);
   Application.Run;
 end.
 

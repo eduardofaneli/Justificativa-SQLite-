@@ -67,6 +67,7 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<Icon_MainIcon>Icones\Google Classroom.ico</Icon_MainIcon>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<DCC_RemoteDebug>false</DCC_RemoteDebug>
@@ -92,6 +93,11 @@
 			<DCCReference Include="uAdicionar.pas">
 				<Form>frmAdicionar</Form>
 			</DCCReference>
+			<RcItem Include="DB\Anakin.s3db">
+				<ContainerId>ResourceItem</ContainerId>
+				<ResourceType>s3db</ResourceType>
+				<ResourceId>Anakin</ResourceId>
+			</RcItem>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

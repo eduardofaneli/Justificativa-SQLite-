@@ -26,7 +26,6 @@ type
     FSetor: String;
     FCodSetor: Integer;
 
-
   public
 
     constructor Create;
@@ -167,6 +166,8 @@ type
     sdSalvarPDF: TSaveDialog;
     qryHistoricoCodFuncionario: TIntegerField;
     qryHistoricoCodSetor: TIntegerField;
+    btnPatelaDeViagem: TPngBitBtn;
+    tbPaletaViagem: TTabSheet;
     procedure FormCreate(Sender: TObject);
     procedure btnSairClick(Sender: TObject);
     procedure btnJustificativasClick(Sender: TObject);
@@ -186,14 +187,15 @@ type
     procedure btnGravarClick(Sender: TObject);
     procedure btnDuplicarClick(Sender: TObject);
     procedure dtHoraRetornoChange(Sender: TObject);
+    procedure btnPatelaDeViagemClick(Sender: TObject);
   private
     FParametros: TParametros;
     FCodSetor: Integer;
     procedure GravarJustificativa;
-    procedure PreencherRelatorio;
-    procedure MontarRelatorio(ADeviceType: String);
+    procedure PreencherJustificativa;
+    procedure MontarJustificativa(ADeviceType: String);
     procedure TipoImpressao(ADeviceType: String);
-    procedure HabilitarBotoes(AHabilitar: Boolean);
+    procedure HabilitarBotoesJustificativa(AHabilitar: Boolean);
     procedure GravarParametrosINI(AParametros: TParametros);
     function LerParametrosINI(AParametros: TParametros): Boolean;
     procedure CarregarDados;
@@ -242,7 +244,7 @@ end;
 procedure TfrmPrincipal.btnCancelarClick(Sender: TObject);
 begin
 
-  HabilitarBotoes(False);
+  HabilitarBotoesJustificativa(False);
 
   pcJustificativa.ActivePage := tbHistorico;
 end;
@@ -268,7 +270,7 @@ begin
 
     CarregarDados;
 
-    HabilitarBotoes(True);
+    HabilitarBotoesJustificativa(True);
 
     pcJustificativa.ActivePage := tbDadosJustificativa;
 
@@ -312,7 +314,7 @@ begin
 
   finally
 
-    HabilitarBotoes(False);
+    HabilitarBotoesJustificativa(False);
 
     qryHistorico.Close;
     qryHistorico.Open;
@@ -326,7 +328,7 @@ end;
 procedure TfrmPrincipal.btnImprimirClick(Sender: TObject);
 begin
 
-  MontarRelatorio('DOC');
+  MontarJustificativa('DOC');
 
 end;
 
@@ -343,7 +345,7 @@ begin
   qryHistorico.Close;
   qryHistorico.Open;
 
-  HabilitarBotoes(False);
+  HabilitarBotoesJustificativa(False);
 
   pcPrincipal.ActivePage     := tbJustificativa;
   pcJustificativa.ActivePage := tbHistorico;
@@ -363,9 +365,16 @@ begin
 
   end;
 
-  HabilitarBotoes(True);
+  HabilitarBotoesJustificativa(True);
 
   pcJustificativa.ActivePage := tbDadosJustificativa;
+end;
+
+procedure TfrmPrincipal.btnPatelaDeViagemClick(Sender: TObject);
+begin
+
+  pcPrincipal.ActivePage     := tbPaletaViagem;
+
 end;
 
 procedure TfrmPrincipal.CarregarDados;
@@ -392,18 +401,18 @@ procedure TfrmPrincipal.btnSalvarPDFClick(Sender: TObject);
 begin
 
   if sdSalvarPDF.Execute(Handle) then
-    MontarRelatorio('PDF');
+    MontarJustificativa('PDF');
 
 end;
 
 procedure TfrmPrincipal.btnVisualisarImpressaoClick(Sender: TObject);
 begin
 
-  MontarRelatorio('Screen');
+  MontarJustificativa('Screen');
 
 end;
 
-procedure TfrmPrincipal.MontarRelatorio;
+procedure TfrmPrincipal.MontarJustificativa;
 var
   Filtro: TStringList;
 begin
@@ -433,7 +442,7 @@ begin
 
 
 
-    PreencherRelatorio;
+    PreencherJustificativa;
 
     TipoImpressao(ADeviceType);
 
@@ -485,14 +494,14 @@ end;
 procedure TfrmPrincipal.dbpHistoricoFirst(Sender: TObject);
 begin
 
-  PreencherRelatorio;
+  PreencherJustificativa;
 
 end;
 
 procedure TfrmPrincipal.dbpHistoricoNext(Sender: TObject);
 begin
 
-  PreencherRelatorio;
+  PreencherJustificativa;
 
 end;
 
@@ -502,9 +511,38 @@ begin
 end;
 
 procedure TfrmPrincipal.FormCreate(Sender: TObject);
+  function ExtrairResource(ResourceName, ResType, Filename: string): Boolean;
+    var
+    Resource: TResourceStream;
+  begin
+    Resource := TResourceStream.create(HInstance, ResourceName, PWideChar(ResType));
+    try
+      Resource.SaveToFile(Filename);
+      result := FileExists(Filename)
+    finally
+      Resource.Free;
+    end;
+  end;
+var
+  ResourceName: string;
 begin
 
+  if not FileExists('Anakin.s3db') then
+  begin
+
+    ResourceName := ExtractFilePath(ParamStr(0));
+    if ResourceName[Length(ResourceName)] <> '\' then
+      ResourceName := ResourceName + '\';
+    ResourceName := ResourceName + 'Anakin.s3db';
+
+    if not ExtrairResource('Anakin', 's3db', ResourceName) Then
+      Application.MessageBox(PChar('Falha ao extrair ' + ResourceName), 'Erro', MB_ICONERROR + MB_OK);
+
+  end;
+
   FParametros := TParametros.Create;
+
+  btnPatelaDeViagem.Visible := DebugHook <> 0;
 
   MostrarTabSheet(False);
 
@@ -514,12 +552,17 @@ end;
 
 procedure TfrmPrincipal.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
+var
+  sRetornoInput: String;
 begin
 
   if pcPrincipal.ActivePage = tbJustificativa then
     if pcJustificativa.ActivePage = tbHistorico then
       if (Key = 80) and (ssCtrl in Shift) then
         btnVisualisarImpressao.Click;
+
+  if (Key = VK_TAB) and (ssCtrl in Shift) and (ssShift in Shift) then
+    btnPatelaDeViagem.Visible := UpperCase(InputBox('Solta Hadouken...', '', sRetornoInput)) = 'RYU';
 
 end;
 
@@ -584,7 +627,7 @@ begin
 
 end;
 
-procedure TfrmPrincipal.HabilitarBotoes(AHabilitar: Boolean);
+procedure TfrmPrincipal.HabilitarBotoesJustificativa(AHabilitar: Boolean);
 var
   I: Integer;
 begin
@@ -630,7 +673,7 @@ begin
 
 end;
 
-procedure TfrmPrincipal.PreencherRelatorio;
+procedure TfrmPrincipal.PreencherJustificativa;
 begin
 
   pplblData.Text                 := FormatDateTime('aaaa DD/MM/YYYY', qryHistoricodata_saida.AsDateTime);
