@@ -176,7 +176,6 @@ type
     procedure btnFecharClick(Sender: TObject);
     procedure btnAddFuncClick(Sender: TObject);
     procedure dblkpFuncionarioCloseUp(Sender: TObject);
-    procedure memoJustificativaKeyPress(Sender: TObject; var Key: Char);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure dbpHistoricoFirst(Sender: TObject);
@@ -251,11 +250,9 @@ end;
 procedure TfrmPrincipal.btnDuplicarClick(Sender: TObject);
 begin
 
-  if not Application.MessageBox(pChar('Confirma Duplicar Justificativa?' + sLineBreak +
-                                      'É necessário alterar os dados antes de concluir a nova Justificativa.'),'Confirmação', MB_ICONQUESTION + MB_YESNO) = mrNo then
+  if Application.MessageBox(pChar('Confirma Duplicar Justificativa?' + sLineBreak +
+                                  'É necessário alterar os dados antes de concluir a nova Justificativa.'),'Confirmação', MB_ICONQUESTION + MB_YESNO) = mrNo then
     Exit;
-
-  try
 
     FParametros.Funcionario   := qryHistoricoCodFuncionario.AsInteger;
     FParametros.Setor         := qryHistoricosetor.AsString;
@@ -271,13 +268,9 @@ begin
 
     CarregarDados;
 
-  finally
-
     HabilitarBotoes(True);
 
     pcJustificativa.ActivePage := tbDadosJustificativa;
-
-  end;
 
 end;
 
@@ -634,20 +627,6 @@ begin
 
     Result := (AParametros.Funcionario > 0);
   end;
-
-end;
-
-procedure TfrmPrincipal.memoJustificativaKeyPress(Sender: TObject;
-  var Key: Char);
-var
-  vVertical: LongInt;
-begin
-
-  vVertical := 99;
-
-  if not (Key in [#8, #13]) then
-    if Length(TMemo(Sender).Lines[TMemo(Sender).CaretPos.Y]) > vVertical then
-      Key := #0;
 
 end;
 

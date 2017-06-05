@@ -733,7 +733,6 @@
                 Align = alClient
                 MaxLength = 752
                 TabOrder = 0
-                OnKeyPress = memoJustificativaKeyPress
               end
             end
           end
