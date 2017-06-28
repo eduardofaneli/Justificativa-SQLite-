@@ -168,6 +168,8 @@ type
     qryHistoricoCodSetor: TIntegerField;
     btnPatelaDeViagem: TPngBitBtn;
     tbPaletaViagem: TTabSheet;
+    pnlDetalheJustificativa: TPanel;
+    memoDetalheJustificativa: TMemo;
     procedure FormCreate(Sender: TObject);
     procedure btnSairClick(Sender: TObject);
     procedure btnJustificativasClick(Sender: TObject);
@@ -188,6 +190,7 @@ type
     procedure btnDuplicarClick(Sender: TObject);
     procedure dtHoraRetornoChange(Sender: TObject);
     procedure btnPatelaDeViagemClick(Sender: TObject);
+    procedure qryHistoricoAfterScroll(DataSet: TDataSet);
   private
     FParametros: TParametros;
     FCodSetor: Integer;
@@ -687,6 +690,12 @@ begin
   pplblFalta.Visible             := qryHistoricocod_motivo.AsInteger = 5;
   pplblHorarioDif.Visible        := qryHistoricocod_motivo.AsInteger = 6;
 
+end;
+
+procedure TfrmPrincipal.qryHistoricoAfterScroll(DataSet: TDataSet);
+begin
+  memoDetalheJustificativa.Clear;
+  memoDetalheJustificativa.Text := qryHistoricojustificativa.AsString;
 end;
 
 { TParametros }

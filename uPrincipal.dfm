@@ -138,7 +138,6 @@
         4EE74B80A7FA2EDCB15009072DED8DBC08F0EF7F073897B0FF1F0BA8B7880BA8
         CDF7BCFF9C80BC47A3800617F01337D289216E140BBC0000000049454E44AE42
         6082}
-      ExplicitTop = 454
     end
   end
   object pnlTela: TPanel
@@ -156,7 +155,7 @@
       Top = 1
       Width = 784
       Height = 504
-      ActivePage = tbInicio
+      ActivePage = tbJustificativa
       Align = alClient
       TabOrder = 0
       object tbInicio: TTabSheet
@@ -507,7 +506,7 @@
           Top = 45
           Width = 776
           Height = 431
-          ActivePage = tbDadosJustificativa
+          ActivePage = tbHistorico
           Align = alClient
           TabOrder = 0
           ExplicitWidth = 747
@@ -517,7 +516,7 @@
               Left = 0
               Top = 0
               Width = 768
-              Height = 403
+              Height = 328
               Align = alClient
               DataSource = dsHistorico
               Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgMultiSelect, dgTitleClick, dgTitleHotTrack]
@@ -575,6 +574,29 @@
                   Width = 115
                   Visible = True
                 end>
+            end
+            object pnlDetalheJustificativa: TPanel
+              Left = 0
+              Top = 328
+              Width = 768
+              Height = 75
+              Align = alBottom
+              BevelOuter = bvNone
+              TabOrder = 1
+              object memoDetalheJustificativa: TMemo
+                Left = 0
+                Top = 0
+                Width = 768
+                Height = 75
+                Align = alClient
+                Color = clInfoBk
+                ReadOnly = True
+                TabOrder = 0
+                ExplicitLeft = 148
+                ExplicitTop = 24
+                ExplicitWidth = 185
+                ExplicitHeight = 89
+              end
             end
           end
           object tbDadosJustificativa: TTabSheet
@@ -994,6 +1016,7 @@
     end
   end
   object qryHistorico: TADQuery
+    AfterScroll = qryHistoricoAfterScroll
     Connection = dmPrincipal.Conexao
     SQL.Strings = (
       'select j.id'
