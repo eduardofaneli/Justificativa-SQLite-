@@ -11,7 +11,7 @@ uses
   ppDB, ppDBPipe, ppParameter, ppDesignLayer, ppBands, ppStrtch, ppMemo,
   ppCtrls, ppPrnabl, ppClass, ppCache, ppComm, ppRelatv, ppProd, ppReport,
   Data.DB, uADCompDataSet, uADCompClient, Vcl.DBCtrls, PngSpeedButton, System.IniFiles,
-  System.DateUtils;
+  System.DateUtils, Vcl.ExtDlgs, Vcl.ImgList;
 
 type
   TParametros = class
@@ -25,6 +25,7 @@ type
     FMotivo: Integer;
     FSetor: String;
     FCodSetor: Integer;
+    FCaminhoImagem: String;
 
   public
 
@@ -41,6 +42,7 @@ type
     property Saida: TTime          read FSaida         write FSaida;
     property Retorno: TTime        read FRetorno       write FRetorno;
     property CodSetor: Integer     read FCodSetor      write FCodSetor;
+    property CaminhoImagem: String read FCaminhoImagem write FCaminhoImagem;
 
   end;
   TfrmPrincipal = class(TForm)
@@ -170,6 +172,13 @@ type
     tbPaletaViagem: TTabSheet;
     pnlDetalheJustificativa: TPanel;
     memoDetalheJustificativa: TMemo;
+    btnConfiguracoes: TPngBitBtn;
+    tbConfiguracoes: TTabSheet;
+    pnlConfiguracoes: TPanel;
+    GroupBox1: TGroupBox;
+    opdImagemFundo: TOpenPictureDialog;
+    edtImagemFundo: TButtonedEdit;
+    imgListImagem: TImageList;
     procedure FormCreate(Sender: TObject);
     procedure btnSairClick(Sender: TObject);
     procedure btnJustificativasClick(Sender: TObject);
@@ -191,6 +200,9 @@ type
     procedure dtHoraRetornoChange(Sender: TObject);
     procedure btnPatelaDeViagemClick(Sender: TObject);
     procedure qryHistoricoAfterScroll(DataSet: TDataSet);
+    procedure btnConfiguracoesClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure edtImagemFundoRightButtonClick(Sender: TObject);
   private
     FParametros: TParametros;
     FCodSetor: Integer;
@@ -202,6 +214,7 @@ type
     procedure GravarParametrosINI(AParametros: TParametros);
     function LerParametrosINI(AParametros: TParametros): Boolean;
     procedure CarregarDados;
+    procedure CarregarImagem();
 
     { Private declarations }
   public
@@ -250,6 +263,13 @@ begin
   HabilitarBotoesJustificativa(False);
 
   pcJustificativa.ActivePage := tbHistorico;
+end;
+
+procedure TfrmPrincipal.btnConfiguracoesClick(Sender: TObject);
+begin
+
+  pcPrincipal.ActivePage := tbConfiguracoes;
+
 end;
 
 procedure TfrmPrincipal.btnDuplicarClick(Sender: TObject);
@@ -395,6 +415,30 @@ begin
 
 end;
 
+procedure TfrmPrincipal.CarregarImagem;
+var
+  FArqIni: TIniFile;
+  CaminhoImagem: string;
+begin
+
+  FArqIni := TIniFile.Create(FParametros.NomeArquivo);
+  try
+
+    CaminhoImagem := FArqINI.ReadString('Justificativa'  ,'CaminhoImagem' ,'');
+
+    if CaminhoImagem <> EmptyStr then
+    begin
+      imgInicio.Picture.LoadFromFile(CaminhoImagem);
+      edtImagemFundo.Text := CaminhoImagem;
+    end;
+
+  finally
+    FreeAndNil(FArqIni);
+  end;
+
+
+end;
+
 procedure TfrmPrincipal.btnSairClick(Sender: TObject);
 begin
   Application.Terminate;
@@ -413,6 +457,33 @@ begin
 
   MontarJustificativa('Screen');
 
+end;
+
+procedure TfrmPrincipal.edtImagemFundoRightButtonClick(Sender: TObject);
+var
+  FArqIni: TIniFile;
+begin
+
+  FArqIni := TIniFile.Create(FParametros.NomeArquivo);
+
+  if opdImagemFundo.Execute then
+  begin
+
+    try
+
+      FParametros.CaminhoImagem := opdImagemFundo.FileName;
+      edtImagemFundo.Text := FParametros.CaminhoImagem;
+
+
+      FArqIni.WriteString('Justificativa', 'CaminhoImagem', FParametros.CaminhoImagem)
+
+    finally
+      FreeAndNil(FArqIni);
+    end;
+
+    Application.MessageBox('Para que a imagem de fundo seja alterada é necessário reiniciar a aplicação.', 'Informação', MB_ICONINFORMATION);
+
+  end;
 end;
 
 procedure TfrmPrincipal.MontarJustificativa;
@@ -567,6 +638,11 @@ begin
   if (Key = VK_TAB) and (ssCtrl in Shift) and (ssShift in Shift) then
     btnPatelaDeViagem.Visible := UpperCase(InputBox('Solta Hadouken...', '', sRetornoInput)) = 'RYU';
 
+end;
+
+procedure TfrmPrincipal.FormShow(Sender: TObject);
+begin
+  CarregarImagem();
 end;
 
 procedure TfrmPrincipal.MostrarTabSheet(AMostrar: Boolean);
