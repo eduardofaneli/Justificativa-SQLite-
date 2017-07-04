@@ -2,7 +2,7 @@
   Left = 282
   Top = 113
   Caption = 'Justificativa'
-  ClientHeight = 506
+  ClientHeight = 551
   ClientWidth = 841
   Color = clWindow
   Font.Charset = DEFAULT_CHARSET
@@ -13,6 +13,7 @@
   KeyPreview = True
   OldCreateOrder = False
   Position = poScreenCenter
+  OnActivate = FormActivate
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   OnShow = FormShow
@@ -22,7 +23,7 @@
     Left = 0
     Top = 0
     Width = 55
-    Height = 506
+    Height = 551
     Align = alLeft
     BevelKind = bkTile
     BevelOuter = bvNone
@@ -32,7 +33,7 @@
     object btnSair: TPngBitBtn
       AlignWithMargins = True
       Left = 3
-      Top = 454
+      Top = 499
       Width = 45
       Height = 45
       Hint = 'Fechar'
@@ -143,7 +144,7 @@
     object btnConfiguracoes: TPngBitBtn
       AlignWithMargins = True
       Left = 3
-      Top = 403
+      Top = 448
       Width = 45
       Height = 45
       Hint = 'Configura'#231#245'es'
@@ -182,17 +183,14 @@
     Left = 55
     Top = 0
     Width = 786
-    Height = 506
+    Height = 551
     Align = alClient
     TabOrder = 1
-    ExplicitLeft = 0
-    ExplicitWidth = 41
-    ExplicitHeight = 782
     object pcPrincipal: TPageControl
       Left = 1
       Top = 1
       Width = 784
-      Height = 504
+      Height = 549
       ActivePage = tbConfiguracoes
       Align = alClient
       TabOrder = 0
@@ -203,7 +201,7 @@
           Left = 3
           Top = 3
           Width = 770
-          Height = 470
+          Height = 515
           Align = alClient
           Center = True
           ExplicitLeft = 212
@@ -223,18 +221,19 @@
           Left = 0
           Top = 45
           Width = 776
-          Height = 431
+          Height = 476
           ActivePage = tbHistorico
           Align = alClient
           TabOrder = 0
           ExplicitWidth = 747
+          ExplicitHeight = 431
           object tbHistorico: TTabSheet
             Caption = 'Hist'#243'rico'
             object grdJustificativas: TDBGrid
               Left = 0
               Top = 0
               Width = 768
-              Height = 328
+              Height = 373
               Align = alClient
               DataSource = dsHistorico
               Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgMultiSelect, dgTitleClick, dgTitleHotTrack]
@@ -295,7 +294,7 @@
             end
             object pnlDetalheJustificativa: TPanel
               Left = 0
-              Top = 328
+              Top = 373
               Width = 768
               Height = 75
               Align = alBottom
@@ -732,14 +731,13 @@
         ImageIndex = 3
         object pnlConfiguracoes: TPanel
           Left = 0
-          Top = 0
+          Top = 45
           Width = 776
           Height = 476
           Align = alClient
           Constraints.MinHeight = 476
           Constraints.MinWidth = 776
           TabOrder = 0
-          ExplicitLeft = 16
           object GroupBox1: TGroupBox
             Left = 1
             Top = 1
@@ -748,21 +746,123 @@
             Align = alTop
             Caption = 'Imagem tela inicial'
             TabOrder = 0
-            object edtImagemFundo: TButtonedEdit
+            object btnLozalizarImagem: TPngSpeedButton
+              AlignWithMargins = True
+              Left = 327
+              Top = 18
+              Width = 21
+              Height = 21
+              Align = alLeft
+              OnClick = btnLozalizarImagemClick
+              PngImage.Data = {
+                89504E470D0A1A0A0000000D49484452000000100000001008060000001FF3FF
+                6100000006624B474400FF00FF00FFA0BDA793000000DC4944415478DA6364A0
+                103052CB0017282605EC016198010D406C0D152406802C3B0AD2876C00081C21
+                C225204B6C60FAD00D6020E01298CD0CF80CC0C6C7254EB2019C40CC01C40E40
+                AC04C4BDC41A2007C4DD406C0EE59F04E212207E4C8C0120CDA780B81F885740
+                C5A280381F884DB019000AA82350762F104F06E20B40DC81A40E445701B136BA
+                01A0D0B746320C64EB03203606E274A8DF41E00010CF02E2D3C80620DB0C0315
+                40FC1C880D8138038B01676006D8A0D90C039D507F13F4023E801C88F31820F9
+                27193D1089310414A08E50FE3E0648343E0200780B335EB91025B40000000049
+                454E44AE426082}
+            end
+            object edtImagemFundo: TEdit
               AlignWithMargins = True
               Left = 5
               Top = 18
-              Width = 444
+              Width = 316
               Height = 21
               Align = alLeft
-              Images = imgListImagem
-              RightButton.HotImageIndex = 0
-              RightButton.ImageIndex = 0
-              RightButton.PressedImageIndex = 0
-              RightButton.Visible = True
               TabOrder = 0
-              OnRightButtonClick = edtImagemFundoRightButtonClick
             end
+          end
+          object gbTemas: TGroupBox
+            Left = 1
+            Top = 45
+            Width = 774
+            Height = 44
+            Align = alTop
+            Caption = 'Temas da aplica'#231#227'o'
+            TabOrder = 1
+            object cbbTemas: TComboBox
+              AlignWithMargins = True
+              Left = 5
+              Top = 18
+              Width = 155
+              Height = 21
+              Align = alLeft
+              TabOrder = 0
+              Text = 'cbbTemas'
+              OnChange = cbbTemasChange
+              ExplicitLeft = 2
+              ExplicitTop = 15
+            end
+          end
+        end
+        object Panel1: TPanel
+          Left = 0
+          Top = 0
+          Width = 776
+          Height = 45
+          Align = alTop
+          BevelKind = bkTile
+          BevelOuter = bvNone
+          TabOrder = 1
+          object btnConfirmarConfig: TPngBitBtn
+            AlignWithMargins = True
+            Left = 3
+            Top = 3
+            Width = 35
+            Height = 35
+            Hint = 'Nova'
+            Align = alLeft
+            ParentShowHint = False
+            ShowHint = True
+            TabOrder = 0
+            OnClick = btnConfirmarConfigClick
+            PngImage.Data = {
+              89504E470D0A1A0A0000000D4948445200000018000000180806000000E0773D
+              F800000006624B474400FF00FF00FFA0BDA793000001D34944415478DACDD53D
+              481C4114C0F177100509A2A0F859AA2841BC08A60922078A68E147209588C10F
+              1244C1CA4AB030AD8858A9A88474A2188262230882318D0A2A242062A7E00784
+              1008181BFFC3BC25777B7BC7AEB9833CF835B37BEFDDCCBC990D499A23F43F14
+              C847275EA250C7AEF0059F71FBD802A518472F3270896B7D568012DC6311EFF5
+              B9EF0211ACE2296634C9A9EB9D4AF46104BFF01A3B7E0A34600B6778E591D81D
+              A6D02794A111BBC90A14E158D7B81E3FC55FE48ADD933CD4442D655C8159F4A0
+              1AE73E933B518E135DCE61AF0266E32E308DD100894D771DE00E539ADC34C0AD
+              BBC05BCCE119BEFB4CDE8E154C624C676E6631A0338929609277E83E38918527
+              62BB245172B3A96DF8ADE337623B70D05D601DC5A88B5ABE0DE4A0D555245172
+              D1E5BAD077620A9864E6A4BE881A6B11DB82DFD0841FE8C2476C8AEDFD3FAE99
+              ED8B3D747105E675B0C8F503734D2CE3AB2EE38704FFDC89844B64AE842584C5
+              9E05AF2299D84E92BC168778A3B30CD4A6CD62BBA3DB63599C48DAA626FEE5A0
+              55C8DF8336E40CA6EAAA309DB627F6AA08EBEF3D0B98087AD955614D7C5E764E
+              44C476423616C476D891EB9DE778877E9DA9EFEBDA09BF1F1CD3791312F08313
+              1D69FB64A624D25EE00103A07519F6B32E8A0000000049454E44AE426082}
+          end
+          object btnFecharConfiguracoes: TPngBitBtn
+            AlignWithMargins = True
+            Left = 734
+            Top = 3
+            Width = 35
+            Height = 35
+            Hint = 'Fechar'
+            Align = alRight
+            ParentShowHint = False
+            ShowHint = True
+            TabOrder = 1
+            OnClick = btnFecharClick
+            PngImage.Data = {
+              89504E470D0A1A0A0000000D4948445200000018000000180806000000E0773D
+              F800000006624B474400FF00FF00FFA0BDA793000001124944415478DA6364A0
+              31601C76160800B13E85665E00E28FB82C7002E2BD145A600FC48708595000C4
+              974834D810887B89B50045119100AB5E622CE003E24F580C04E9E501E2CF9458
+              2006C4278178211037A0193E1188ED80D8166A09D93E6801E26A68F896003113
+              10CF06E224206E06E23A4A8308045A81B80A88FB81981F6A781310D753230E60
+              A00D882BA16C74C329B600142C73803811CA07F9A4885A16800C9F0BC40940DC
+              08C46C509F4C00E2424A2D6006E225401C01C41540DC0955D70EE54F80FAE43F
+              B916C800F119209E8F14FE307D5381D813888D81F81D2541240EC42F19300148
+              AF2810BFA24624130348B2208F81BCC2AE9F580B2801782D1080BA8412708E01
+              4F85437530F42D0000A0D35F19E8590FF10000000049454E44AE426082}
           end
         end
       end
@@ -2002,7 +2102,7 @@
     Left = 596
     Top = 121
     Bitmap = {
-      494C010101000500040010001000FFFFFFFF2100FFFFFFFFFFFFFFFF424D3600
+      494C010101000500040010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       00000000000000000000000000000000000000000000E1E1E1FF525252FF1111
@@ -2138,6 +2238,7 @@
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000}
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000}
   end
 end
