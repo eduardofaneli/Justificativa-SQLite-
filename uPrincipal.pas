@@ -11,7 +11,7 @@ uses
   ppDB, ppDBPipe, ppParameter, ppDesignLayer, ppBands, ppStrtch, ppMemo,
   ppCtrls, ppPrnabl, ppClass, ppCache, ppComm, ppRelatv, ppProd, ppReport,
   Data.DB, uADCompDataSet, uADCompClient, Vcl.DBCtrls, PngSpeedButton, System.IniFiles,
-  System.DateUtils, Vcl.ExtDlgs, Vcl.ImgList;
+  System.DateUtils, Vcl.ExtDlgs, Vcl.ImgList, Vcl.Themes, Vcl.Styles;
 
 type
   TParametros = class
@@ -26,7 +26,7 @@ type
     FSetor: String;
     FCodSetor: Integer;
     FCaminhoImagem: String;
-
+    FTema: String;
   public
 
     constructor Create;
@@ -43,6 +43,7 @@ type
     property Retorno: TTime        read FRetorno       write FRetorno;
     property CodSetor: Integer     read FCodSetor      write FCodSetor;
     property CaminhoImagem: String read FCaminhoImagem write FCaminhoImagem;
+    property Tema: String          read FTema          write FTema;
 
   end;
   TfrmPrincipal = class(TForm)
@@ -177,8 +178,19 @@ type
     pnlConfiguracoes: TPanel;
     GroupBox1: TGroupBox;
     opdImagemFundo: TOpenPictureDialog;
-    edtImagemFundo: TButtonedEdit;
     imgListImagem: TImageList;
+    gbTemas: TGroupBox;
+    cbbTemas: TComboBox;
+    edtImagemFundo: TEdit;
+    btnLozalizarImagem: TPngSpeedButton;
+    Panel1: TPanel;
+    btnConfirmarConfig: TPngBitBtn;
+    btnFecharConfiguracoes: TPngBitBtn;
+    qryHistoricoENTREGUE: TStringField;
+    btnEntregar: TPngBitBtn;
+    qryEntregarJustificativa: TADQuery;
+    imgListGrid: TImageList;
+    qryHistoricoEntregueGrid: TStringField;
     procedure FormCreate(Sender: TObject);
     procedure btnSairClick(Sender: TObject);
     procedure btnJustificativasClick(Sender: TObject);
@@ -203,9 +215,19 @@ type
     procedure btnConfiguracoesClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure edtImagemFundoRightButtonClick(Sender: TObject);
+    procedure btnLozalizarImagemClick(Sender: TObject);
+    procedure btnConfirmarConfigClick(Sender: TObject);
+    procedure cbbTemasChange(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
+    procedure btnEntregarClick(Sender: TObject);
+    procedure grdJustificativasDrawColumnCell(Sender: TObject;
+      const Rect: TRect; DataCol: Integer; Column: TColumn;
+      State: TGridDrawState);
   private
     FParametros: TParametros;
     FCodSetor: Integer;
+    FPosicaoGrid: Integer;
+
     procedure GravarJustificativa;
     procedure PreencherJustificativa;
     procedure MontarJustificativa(ADeviceType: String);
@@ -213,8 +235,10 @@ type
     procedure HabilitarBotoesJustificativa(AHabilitar: Boolean);
     procedure GravarParametrosINI(AParametros: TParametros);
     function LerParametrosINI(AParametros: TParametros): Boolean;
-    procedure CarregarDados;
-    procedure CarregarImagem();
+    procedure CarregarDados();
+    procedure CarregarConfiguracao();
+    procedure CarregarComboTemas();
+    procedure GravarConfiguracao();
 
     { Private declarations }
   public
@@ -272,6 +296,21 @@ begin
 
 end;
 
+procedure TfrmPrincipal.btnConfirmarConfigClick(Sender: TObject);
+begin
+
+  if Application.MessageBox(pChar('Aplicar novas configurações?'),'Confirmação', MB_ICONQUESTION + MB_YESNO) = mrNo then
+    Exit;
+
+  GravarConfiguracao();
+
+  CarregarConfiguracao();
+
+  TStyleManager.TrySetStyle(FParametros.Tema);
+  CarregarComboTemas();
+
+end;
+
 procedure TfrmPrincipal.btnDuplicarClick(Sender: TObject);
 begin
 
@@ -296,6 +335,32 @@ begin
     HabilitarBotoesJustificativa(True);
 
     pcJustificativa.ActivePage := tbDadosJustificativa;
+
+end;
+
+procedure TfrmPrincipal.btnEntregarClick(Sender: TObject);
+begin
+
+  try
+
+    FPosicaoGrid := qryHistorico.RecNo;
+
+    qryEntregarJustificativa.Close;
+    qryEntregarJustificativa.ParamByName('justificativa').AsInteger := qryHistoricoid.AsInteger;
+    qryEntregarJustificativa.ExecSQL;
+
+    Application.MessageBox(pCHar('Justificativa entregue!'),'Erro', MB_ICONINFORMATION);
+
+    qryHistorico.Close;
+    qryHistorico.Open;
+
+    qryHistorico.RecNo := FPosicaoGrid;
+
+  except
+    on e:Exception do
+      Application.MessageBox(pCHar('Falha ao marcar Justificativa como entregue' + sLineBreak + e.Message),'Erro', MB_ICONERROR);
+
+  end;
 
 end;
 
@@ -365,13 +430,32 @@ end;
 procedure TfrmPrincipal.btnJustificativasClick(Sender: TObject);
 begin
 
-  qryHistorico.Close;
-  qryHistorico.Open;
+  try
 
-  HabilitarBotoesJustificativa(False);
+    qryHistorico.Close;
+    qryHistorico.Open;
 
-  pcPrincipal.ActivePage     := tbJustificativa;
-  pcJustificativa.ActivePage := tbHistorico;
+    HabilitarBotoesJustificativa(False);
+
+    pcPrincipal.ActivePage     := tbJustificativa;
+    pcJustificativa.ActivePage := tbHistorico;
+  except
+    on e: Exception do
+    begin
+      if Pos('no such column', e.Message) > 0 then
+      begin
+        try
+          dmPrincipal.ExecutarScripts();
+          btnJustificativas.Click;
+        except
+          on e: Exception do
+            Application.MessageBox(PChar('Falha na aplicação.' + sLineBreak + 'Motivo:'+ sLineBreak + e.Message), 'Erro', MB_ICONERROR);
+
+        end;
+      end;
+
+    end;
+  end;
 
 end;
 
@@ -415,27 +499,55 @@ begin
 
 end;
 
-procedure TfrmPrincipal.CarregarImagem;
+procedure TfrmPrincipal.CarregarConfiguracao;
 var
   FArqIni: TIniFile;
-  CaminhoImagem: string;
 begin
 
   FArqIni := TIniFile.Create(FParametros.NomeArquivo);
   try
 
-    CaminhoImagem := FArqINI.ReadString('Justificativa'  ,'CaminhoImagem' ,'');
+    FParametros.CaminhoImagem := FArqINI.ReadString('Justificativa'  ,'CaminhoImagem' ,'');
+    FParametros.Tema          := FArqINI.ReadString('Justificativa'  ,'Tema' ,'Golden Graphite');
 
-    if CaminhoImagem <> EmptyStr then
+    if FParametros.CaminhoImagem <> EmptyStr then
     begin
-      imgInicio.Picture.LoadFromFile(CaminhoImagem);
-      edtImagemFundo.Text := CaminhoImagem;
+      imgInicio.Picture.LoadFromFile(FParametros.CaminhoImagem);
+      edtImagemFundo.Text := FParametros.CaminhoImagem;
     end;
 
   finally
     FreeAndNil(FArqIni);
   end;
 
+
+end;
+
+procedure TfrmPrincipal.cbbTemasChange(Sender: TObject);
+begin
+  FParametros.Tema := cbbTemas.Items[cbbTemas.ItemIndex];
+end;
+
+procedure TfrmPrincipal.CarregarComboTemas;
+var
+  sTemas: String;
+begin
+
+  cbbTemas.Items.BeginUpdate;
+
+  try
+
+    cbbTemas.Items.Clear;
+
+    for sTemas in TStyleManager.StyleNames do
+      cbbTemas.Items.Add(sTemas);
+
+    cbbTemas.Sorted := True;
+    cbbTemas.ItemIndex := cbbTemas.Items.IndexOf(TStyleManager.ActiveStyle.Name);
+
+  finally
+    cbbTemas.Items.EndUpdate;
+  end;
 
 end;
 
@@ -584,6 +696,12 @@ begin
   edtTempo.Text := IntToStr(MinutesBetween(dtHoraSaida.Time, dtHoraRetorno.Time));
 end;
 
+procedure TfrmPrincipal.FormActivate(Sender: TObject);
+begin
+  TStyleManager.TrySetStyle(FParametros.Tema);
+  CarregarComboTemas();
+end;
+
 procedure TfrmPrincipal.FormCreate(Sender: TObject);
   function ExtrairResource(ResourceName, ResType, Filename: string): Boolean;
     var
@@ -642,7 +760,9 @@ end;
 
 procedure TfrmPrincipal.FormShow(Sender: TObject);
 begin
-  CarregarImagem();
+
+  CarregarConfiguracao();
+
 end;
 
 procedure TfrmPrincipal.MostrarTabSheet(AMostrar: Boolean);
@@ -654,6 +774,23 @@ begin
     if Components[I].ClassType = TTabSheet then
       TTabSheet(Components[I]).TabVisible := AMostrar;
 
+
+end;
+
+procedure TfrmPrincipal.GravarConfiguracao;
+var
+  FArqIni: TIniFile;
+begin
+  FArqIni := TIniFile.Create(FParametros.NomeArquivo);
+
+  try
+
+    FArqIni.WriteString('Justificativa', 'CaminhoImagem', FParametros.CaminhoImagem);
+    FArqIni.WriteString('Justificativa', 'Tema', FParametros.Tema);
+
+  finally
+    FreeAndNil(FArqIni);
+  end;
 
 end;
 
@@ -706,6 +843,25 @@ begin
 
 end;
 
+procedure TfrmPrincipal.grdJustificativasDrawColumnCell(Sender: TObject;
+  const Rect: TRect; DataCol: Integer; Column: TColumn;
+  State: TGridDrawState);
+begin
+
+  if Column.FieldName = 'EntregueGrid' then
+  begin
+
+    grdJustificativas.Canvas.FillRect(Rect);
+    if qryHistoricoENTREGUE.AsString = 'N' then
+      imgListGrid.Draw(grdJustificativas.Canvas, Rect.Left + 10, Rect.Top + 1, 0)
+    else
+      imgListGrid.Draw(grdJustificativas.Canvas, Rect.Left + 10, Rect.Top + 1, 1)
+
+  end;
+
+
+end;
+
 procedure TfrmPrincipal.HabilitarBotoesJustificativa(AHabilitar: Boolean);
 var
   I: Integer;
@@ -750,6 +906,18 @@ begin
     Result := (AParametros.Funcionario > 0);
   end;
 
+end;
+
+procedure TfrmPrincipal.btnLozalizarImagemClick(Sender: TObject);
+begin
+
+  if opdImagemFundo.Execute then
+  begin
+
+    FParametros.CaminhoImagem := opdImagemFundo.FileName;
+    edtImagemFundo.Text := FParametros.CaminhoImagem;
+
+  end;
 end;
 
 procedure TfrmPrincipal.PreencherJustificativa;

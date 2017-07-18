@@ -15,11 +15,19 @@ object dmPrincipal: TdmPrincipal
   end
   object Conexao: TADConnection
     Params.Strings = (
-      'Database=C:\Eduardo Faneli\Justificativa2\Anakin.s3db'
+      'Database=C:\Eduardo Faneli\Atualizador\Win32\Debug\Anakin.s3db'
       'LockingMode=Normal'
       'DriverID=SQLite')
     LoginPrompt = False
     Left = 168
     Top = 24
+  end
+  object Scripts: TADScript
+    SQLScripts = <>
+    Connection = Conexao
+    Params = <>
+    Macros = <>
+    Left = 68
+    Top = 84
   end
 end
